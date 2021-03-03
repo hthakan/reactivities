@@ -43,23 +43,17 @@ namespace API
             {
                 opt.UseSqlite(_config.GetConnectionString("DefaultConnection"));
             });
-            services.AddCors(options => 
-            {
-                options.AddPolicy(name: MyAllowSpecificOrigins,
-                               builder =>
-                               {
-                                   builder.WithOrigins("http://localhost:3000",
-                                                       "http://192.168.0.36:3000",
-                                                       "http://127.0.0.1:3000")
-                                                  .AllowAnyHeader()
-                                                  .AllowAnyMethod();
-                               });
-            });
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors(options =>
+                options.WithOrigins("http://localhost:3000")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -68,18 +62,13 @@ namespace API
             }
 
 
-            app.UseHttpsRedirection();
-
             app.UseRouting();
-
-            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers()
-                          .RequireCors(MyAllowSpecificOrigins);
+                endpoints.MapControllers();
             });
         }
     }
